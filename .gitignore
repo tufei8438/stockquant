@@ -1,0 +1,13 @@
+*.pyc
+*.pyo
+*.so
+*.class
+*~
+.idea
+.tox/
+.vagrant
+/.coverage
+build/
+/dist/
+/env/
+MANIFEST

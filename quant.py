@@ -1,0 +1,32 @@
+# coding:utf8
+
+"""
+Copyright 2016 Smallpay Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+from stockquant.spider.tencent import TencentRunner
+from stockquant.strategy.blocktrading import BlockTradingStrategy
+
+
+def do_quant(stock_code, interval=5):
+
+    def tencent_runner_cb(trade):
+        BlockTradingStrategy(trade).handle_strategy()
+
+    runner = TencentRunner(stock_code, interval, tencent_runner_cb)
+    runner.start()
+
+
+if __name__ == '__main__':
+    do_quant('sz002177')
