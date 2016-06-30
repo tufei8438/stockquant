@@ -16,6 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import unittest
+import datetime
 
 from stockquant.database.models import Trade
 from stockquant.strategy.blocktrading import BlockTradingStrategy
@@ -25,7 +26,7 @@ from stockquant.utils.mail import Mail
 class BlockTradingStrategyTest(unittest.TestCase):
 
     def test_mail_content(self):
-        trade = Trade(stock_code='sz002177')
+        trade = Trade(stock_code='sz002177', trade_time=datetime.datetime.now())
         strategy = BlockTradingStrategy(trade)
         content = strategy.get_mail_content()
         print content
