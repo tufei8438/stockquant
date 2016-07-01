@@ -20,7 +20,7 @@ import time
 import datetime
 import threading
 
-from stockquant.database.models import Trade
+from stockquant.database.models import Trade, Company
 from stockquant.database.services import TradeService
 from stockquant.spider import Spider, SpiderError
 from stockquant.utils.holiday import Holiday
@@ -83,18 +83,62 @@ class StockMiniuteQueryParser(object):
         return self._trades
 
 
+class StockCompanyQueryParser(object):
+
+    def __init__(self, stock_code, data):
+        assert isinstance(data, dict)
+        self._stock_code = stock_code
+        self._data = data
+
+        company = Company()
+        gegu = self._data['data']['gegu']
+        company.stock_code = self._stock_code
+        company.name = gegu.get('gsmz')
+        riqi = gegu.get('riqi')
+        company.listing_date = riqi and datetime.datetime.strptime(riqi, '%Y-%m-%d') or None
+        jg = gegu.get('jg')
+        company.issue_price = jg and decimal.Decimal(jg) or None
+        fxs = gegu.get('fxs')
+        if fxs:
+            company.issue_number = int(float(fxs.replace('万股', '')) * 10000)
+        company.local_area = gegu.get('dy')
+        company.business_scope = gegu.get('yw')
+
+        plate = gegu.get('plate')
+        company.industry_code = plate[0]['id']
+        company.industry_name = plate[0]['name']
+
+        self._company = company
+
+    @property
+    def company(self):
+        return self._company
+
+
 class TencentSpider(Spider):
 
     STOCK_MINUTE_QUERY_URL = 'http://proxy.finance.qq.com/ifzqgtimg/appstock/app/minute/query'
+    STOCK_COMPANY_QUERY_URL = 'http://proxy.finance.qq.com/ifzqgtimg/stock/corp/cwbb/search'
 
     def query_stock_minute(self, stock_code):
         parameters = {
             'p': 1,
             'code': stock_code,
-            '_rndtime' : int(time.time())
+            '_rndtime': int(time.time())
         }
         data = self.fetch('GET', self.STOCK_MINUTE_QUERY_URL, params=parameters)
         return StockMiniuteQueryParser(stock_code, data).trades
+
+    def query_company(self, stock_code):
+        parameters = {
+            'symbol': stock_code,
+            'type': 'sum',
+            'num': 4,
+            'jianjie': 1,
+            '_rndtime': int(time.time()),
+        }
+        data = self.fetch('GET', self.STOCK_COMPANY_QUERY_URL, params=parameters)
+        return StockCompanyQueryParser(stock_code, data).company
 
 
 class TencentRunner(threading.Thread):

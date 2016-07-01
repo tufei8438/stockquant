@@ -15,6 +15,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from sqlalchemy import create_engine
+import unittest
 
-engine = create_engine('mysql+mysqldb://root:@localhost:3306/stock?charset=utf8&use_unicode=0', echo=False)
+from stockquant.database.services import CompanyService
+from stockquant.spider.tencent import TencentSpider
+
+
+class CompanyServiceTest(unittest.TestCase):
+
+    def test_add_company(self):
+        spider = TencentSpider()
+        company = spider.query_company('sz002177')
+        with CompanyService() as company_service:
+            company_service.add_company(company)

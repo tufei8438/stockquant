@@ -64,15 +64,15 @@ MAIL_CONTENT_TEMPLATE = """
                   </tr>
                </thead>
                <tbody>
-               {% for trade in db_trades %}
+               {% for db_trade in db_trades %}
                   <tr>
-                     <td>{{ trade.stock_code }}</td>
-                     <td>{{ trade.trade_time.strftime('%H:%M:%S') }}</td>
-                     <td>{{ trade.trade_price }}</td>
-                     <td>{{ trade.price_change }}</td>
-                     <td>{{ trade.volume }}</td>
-                     <td>{{ trade.amount }}</td>
-                     <td>{{ trade.nature }}</td>
+                     <td>{{ db_trade.stock_code }}</td>
+                     <td>{{ db_trade.trade_time.strftime('%H:%M:%S') }}</td>
+                     <td>{{ db_trade.trade_price }}</td>
+                     <td>{{ db_trade.price_change }}</td>
+                     <td>{{ db_trade.volume }}</td>
+                     <td>{{ db_trade.amount }}</td>
+                     <td>{{ db_trade.nature }}</td>
                   </tr>
                 {% endfor %}
                </tbody>

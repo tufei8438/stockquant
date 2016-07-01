@@ -17,7 +17,7 @@ limitations under the License.
 """
 import decimal
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, TIMESTAMP, DECIMAL
+from sqlalchemy import Column, Integer, String, TIMESTAMP, DECIMAL, DATE, BIGINT
 
 Base = declarative_base()
 
@@ -57,3 +57,19 @@ class Trade(Base):
                hash(self.volume) ^ \
                hash(self.amount) ^ \
                hash(self.nature)
+
+
+class Company(Base):
+
+    __tablename__ = 'company'
+
+    id = Column(Integer, primary_key=True)
+    stock_code = Column(String(32))
+    name = Column(String(64))
+    listing_date = Column(DATE, nullable=True)
+    issue_price = Column(DECIMAL, nullable=True)
+    issue_number = Column(BIGINT, nullable=True)
+    business_scope = Column(String(1024), nullable=True)
+    industry_code = Column(String(16))
+    industry_name = Column(String(32))
+    local_area = Column(String(32), nullable=True)

@@ -17,7 +17,7 @@ limitations under the License.
 """
 from sqlalchemy.orm import sessionmaker
 from stockquant.database import engine
-from stockquant.database.models import Trade
+from stockquant.database.models import Trade, Company
 
 
 class BaseService(object):
@@ -51,3 +51,15 @@ class TradeService(BaseService):
         if limit:
             q = q.limit(limit)
         return q.all()
+
+
+class CompanyService(BaseService):
+
+    def add_company(self, company):
+        self._db.add(company)
+
+    def get_company(self, stock_code):
+        return self._db.query(Company).filter(Company.stock_code == stock_code).fitst()
+
+    def query_companies(self):
+        return self._db.query(Company).all()
