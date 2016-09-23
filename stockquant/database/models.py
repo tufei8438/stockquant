@@ -15,9 +15,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-import decimal
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, TIMESTAMP, DECIMAL, DATE, BIGINT
+from sqlalchemy import Column, Integer, String, DATETIME, DECIMAL, DATE, BIGINT
 
 Base = declarative_base()
 
@@ -28,14 +27,15 @@ class Trade(Base):
 
     id = Column(Integer, primary_key=True)
     stock_code = Column(String(32))
-    trade_time = Column(TIMESTAMP)
+    trade_seq = Column(Integer)
+    trade_time = Column(DATETIME)
     trade_price = Column(DECIMAL)
     price_change = Column(DECIMAL)
     volume = Column(Integer)
     amount = Column(Integer)
     nature = Column(String(32))
 
-    def __eq__(self, other):
+    def equal(self, other):
         if not isinstance(other, Trade):
             return False
         if self.stock_code == other.stock_code \
@@ -49,14 +49,17 @@ class Trade(Base):
         else:
             return False
 
-    def __hash__(self):
-        return hash(self.stock_code) ^ \
-               hash(self.trade_time) ^ \
-               hash(self.trade_price) ^ \
-               hash(self.price_change) ^ \
-               hash(self.volume) ^ \
-               hash(self.amount) ^ \
-               hash(self.nature)
+    @classmethod
+    def minus(cls, trades, other_trades):
+        if not other_trades:
+            return trades
+
+        same_trades = []
+        for trade in trades:
+            for o_trade in other_trades:
+                if trade.equal(o_trade):
+                    same_trades.append(trade)
+        return list(set(trades).difference(set(same_trades)))
 
 
 class Company(Base):

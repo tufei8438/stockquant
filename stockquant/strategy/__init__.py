@@ -19,5 +19,5 @@ limitations under the License.
 
 class Strategy(object):
 
-    def handle_strategy(self):
+    def handle_strategy(self, trade):
         pass

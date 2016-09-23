@@ -85,17 +85,14 @@ MAIL_CONTENT_TEMPLATE = """
 
 class BlockTradingStrategy(Strategy):
 
-    def __init__(self, trade):
-        self.trade = trade
-
-    def handle_strategy(self):
-        if self.trade.amount > 1000000:
-            trade_time_s = self.trade.trade_time.strftime('%Y-%m-%d %H:%M:%S')
-            subject = "股票:[%s]在%s有交易大单操作" % (self.trade.stock_code, trade_time_s)
-            content = self.get_mail_content()
+    def handle_strategy(self, trade):
+        if trade.amount > 10000000:
+            trade_time_s = trade.trade_time.strftime('%Y-%m-%d %H:%M:%S')
+            subject = "股票:[%s]在%s有交易大单操作" % (trade.stock_code, trade_time_s)
+            content = self.get_mail_content(trade)
             Mail().send(subject, content, subtype='html')
 
-    def get_mail_content(self):
+    def get_mail_content(self, trade):
         with TradeService() as trade_service:
-            db_trades = trade_service.query_trades(self.trade.stock_code, 10)
-            return Template(MAIL_CONTENT_TEMPLATE).render(db_trades=db_trades, trade=self.trade)
+            db_trades = trade_service.query_trades(trade.stock_code, 10)
+            return Template(MAIL_CONTENT_TEMPLATE).render(db_trades=db_trades, trade=trade)

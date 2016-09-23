@@ -36,6 +36,8 @@ class StockMiniuteQueryParser(object):
         self._stock_code = stock_code
         self._data = data
         self._trades = []
+        self._trade_begin_time = None
+        self._trade_end_time = None
 
         if not self._data.has_key('data'):
             raise SpiderError("invalid data:%s" % self._data)
@@ -46,6 +48,11 @@ class StockMiniuteQueryParser(object):
         try:
             mx_data = stock_code_data['mx_price']['mx']['data'][1]
             self._trades = self.parse_many(self._stock_code, mx_data)
+
+            timeline = stock_code_data['mx_price']['mx']['timeline'][1]
+            timeline_array = timeline.split('~')
+            self._trade_begin_time = self._get_trade_time(timeline_array[0])
+            self._trade_end_time = self._get_trade_time(timeline_array[1])
         except (KeyError, IndexError):
             self._trades = []
 
@@ -56,7 +63,7 @@ class StockMiniuteQueryParser(object):
         array = data.split('|')
         for item in array:
             trades.append(cls.parse(stock_code, item))
-        cls._today = None
+        sorted(trades, key=lambda trade: trade.trade_seq)
         return trades
 
     @classmethod
@@ -65,6 +72,7 @@ class StockMiniuteQueryParser(object):
         if len(array) != 7:
             raise SpiderError("parse TradeDetail error. invalid text:" + text)
         trade = Trade(stock_code=stock_code)
+        trade.trade_seq = int(array[0])
         trade.trade_time = cls._get_trade_time(array[1])
         trade.trade_price = decimal.Decimal(array[2])
         trade.price_change = decimal.Decimal(array[3])
@@ -81,6 +89,14 @@ class StockMiniuteQueryParser(object):
     @property
     def trades(self):
         return self._trades
+
+    @property
+    def begin_time(self):
+        return self._trade_begin_time
+
+    @property
+    def end_time(self):
+        return self._trade_end_time
 
 
 class StockCompanyQueryParser(object):
@@ -127,7 +143,7 @@ class TencentSpider(Spider):
             '_rndtime': int(time.time())
         }
         data = self.fetch('GET', self.STOCK_MINUTE_QUERY_URL, params=parameters)
-        return StockMiniuteQueryParser(stock_code, data).trades
+        return StockMiniuteQueryParser(stock_code, data)
 
     def query_company(self, stock_code):
         parameters = {
@@ -168,13 +184,13 @@ class TencentRunner(threading.Thread):
         if not self._in_trading():
             return
 
-        trades = TencentSpider().query_stock_minute(self._stock_code)
+        parser = TencentSpider().query_stock_minute(self._stock_code)
         with TradeService() as trade_service:
-            db_trades = trade_service.query_trades(stock_code=self._stock_code, limit=100)
-            for trade in trades:
-                if trade not in db_trades:
-                    trade_service.add_trade(trade)
-                    self._callback(trade)
+            db_trades = trade_service.query_trades(self._stock_code, trade_time=parser.begin_time)
+            add_trades = Trade.minus(parser.trades, db_trades)
+            for trade in add_trades:
+                trade_service.add_trade(trade)
+                self._callback(trade)
 
     @classmethod
     def _get_trade_datetime(cls, time_text, today=None):
@@ -188,7 +204,7 @@ class TencentRunner(threading.Thread):
         :return: bool
         """
         today = datetime.datetime.now()
-        if today.weekday() == 6 or today.weekday() == 0:
+        if today.weekday() == 5 or today.weekday() == 6:
             return False
         if Holiday.is_holiday(today):
             return False

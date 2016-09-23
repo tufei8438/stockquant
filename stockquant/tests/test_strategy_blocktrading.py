@@ -27,8 +27,8 @@ class BlockTradingStrategyTest(unittest.TestCase):
 
     def test_mail_content(self):
         trade = Trade(stock_code='sz002177', trade_time=datetime.datetime.now())
-        strategy = BlockTradingStrategy(trade)
-        content = strategy.get_mail_content()
+        strategy = BlockTradingStrategy()
+        content = strategy.get_mail_content(trade)
         print content
 
         Mail().send('股票账号交易行情', content, subtype='html')

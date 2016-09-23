@@ -39,3 +39,15 @@ class TradeTest(unittest.TestCase):
             trade.nature = 'S'
 
             self.assertEqual(trade, db_trades[0])
+
+    def test_add(self):
+        with TradeService as trade_service:
+            trade = Trade()
+            trade.stock_code = 'sz002177'
+            trade.trade_time = datetime.datetime.strptime('2016-06-27 14:56:07', '%Y-%m-%d %H:%M:%S')
+            trade.trade_price = decimal.Decimal('9.51')
+            trade.price_change = decimal.Decimal('0.00')
+            trade.volume = 220
+            trade.amount = 209435
+            trade.nature = 'S'
+            trade_service.add_trade(trade)
