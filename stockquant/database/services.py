@@ -56,7 +56,7 @@ class TradeService(BaseService):
         :param trade_time:
         :return: 交易列表
         """
-        q = self._db.query(Trade).filter(Trade.stock_code == stock_code).order_by(Trade.trade_time.desc())
+        q = self._db.query(Trade).filter(Trade.stock_code == stock_code).order_by(Trade.trade_seq.asc())
         if limit:
             q = q.limit(limit)
         if trade_time:

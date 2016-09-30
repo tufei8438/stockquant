@@ -63,7 +63,6 @@ class StockMiniuteQueryParser(object):
         array = data.split('|')
         for item in array:
             trades.append(cls.parse(stock_code, item))
-        sorted(trades, key=lambda trade: trade.trade_seq)
         return trades
 
     @classmethod

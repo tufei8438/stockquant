@@ -39,13 +39,17 @@ class Trade(Base):
         if not isinstance(other, Trade):
             return False
         if self.stock_code == other.stock_code \
-            and self.trade_time == other.trade_time \
-            and self.trade_price == other.trade_price \
-            and self.price_change == other.price_change \
-            and self.volume == other.volume \
-            and self.amount == other.amount \
-            and self.nature == other.nature:
-            return True
+                and self.trade_price == other.trade_price \
+                and self.price_change == other.price_change \
+                and self.volume == other.volume \
+                and self.amount == other.amount \
+                and self.nature == other.nature:
+            if self.trade_time == other.trade_time \
+                    or self.trade_seq == other.trade_seq \
+                    or self.trade_seq < other.trade_seq:
+                return True
+            else:
+                return False
         else:
             return False
 

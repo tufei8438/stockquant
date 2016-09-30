@@ -65,5 +65,5 @@ class Test(unittest.TestCase):
 
         for trade in trades:
             for trade_1 in trades_1:
-                if trade_1 == trade:
-                    print trade.__dict__
+                if trade_1.equal(trade):
+                    print trade.__dict__, trade_1.__dict__
